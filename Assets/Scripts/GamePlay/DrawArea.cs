@@ -8,21 +8,23 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 	private float distanceFromCam;
 	private float previousTimeScale;
 
-	[Header("Limits")]
-	[SerializeField] private RectTransform top;
-	[SerializeField] private RectTransform bottom;
-	[SerializeField] private RectTransform left;
-	[SerializeField] private RectTransform right;
-
 	private Car car => Player.Instance.Car;
+
+	private RectTransform rectTransform;
+
+	private void Awake()
+	{
+		rectTransform = GetComponent<RectTransform>();
+	}
 
 	private void Start()
 	{
-		distanceFromCam = Vector3.Distance(GameManager.MainCamera.transform.position, transform.position) - 1.5f;
+		distanceFromCam = Vector3.Distance(GameManager.MainCamera.transform.position, transform.position) - 2f;
 	}
 
 	public void OnBeginDrag(PointerEventData eventData)
 	{
+		car.IsCarDrawn = false;
 		brush.enabled = true;
 
 		previousTimeScale = Time.timeScale;
@@ -33,7 +35,18 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 	{
 		Vector2 touchPos = eventData.position;
 
+		// Limit the drawing inside the drawing area
+		if (touchPos.y > rectTransform.anchoredPosition.y)
+			touchPos.y = rectTransform.anchoredPosition.y;
+		else if (touchPos.y < rectTransform.anchoredPosition.y - rectTransform.rect.height)
+			touchPos.y = rectTransform.anchoredPosition.y - rectTransform.rect.height;
+		if (touchPos.x > rectTransform.anchoredPosition.x + rectTransform.rect.width)
+			touchPos.x = rectTransform.anchoredPosition.x + rectTransform.rect.width;
+		else if (touchPos.x < rectTransform.anchoredPosition.x)
+			touchPos.x = rectTransform.anchoredPosition.x;
+
 		Vector3 pos = GameManager.MainCamera.ScreenToWorldPoint((Vector3)touchPos + Vector3.forward * distanceFromCam);
+		pos -= brush.transform.position;
 
 		Draw(pos);
 	}
@@ -54,14 +67,18 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 		brush.SetPosition(brush.positionCount - 1, pos);
 	}
 
-	public void CreateMesh()
+	private void CreateMesh()
 	{
+		// car.transform.eulerAngles = Vector3.zero;
+
 		Vector3[] positions = new Vector3[brush.positionCount];
 		brush.GetPositions(positions);
+		for (int i = 0; i < positions.Length; i++)
+			positions[i].z = 0;
+
 		Player.Instance.MeshGenerator.GenerateMesh(positions);
 
-		car.transform.eulerAngles = -transform.eulerAngles;
-
-		Player.Instance.Rb.isKinematic = false;
+		// car.transform.eulerAngles = -transform.eulerAngles;
+		car.SetupCar(positions[0], positions[positions.Length - 1]);
 	}
 }

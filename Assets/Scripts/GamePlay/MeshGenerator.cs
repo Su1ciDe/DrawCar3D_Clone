@@ -8,10 +8,8 @@ public class MeshGenerator : MonoBehaviour
 
 	[SerializeField] private int resolution = 10;
 	[SerializeField] private float radius = 1;
-	[SerializeField] private bool _useWorldSpace = true;
 
-	private Vector3[] _vertices;
-	private MeshRenderer _meshRenderer;
+	private Vector3[] vertices;
 
 	private void Awake()
 	{
@@ -22,30 +20,26 @@ public class MeshGenerator : MonoBehaviour
 
 	public void GenerateMesh(Vector3[] positions)
 	{
-		if (Mesh == null || positions == null || positions.Length <= 1)
-		{
-			Mesh = new Mesh();
-			return;
-		}
+		if (Mesh == null || positions == null || positions.Length <= 1) return;
 
-		var verticesLength = resolution * positions.Length;
-		if (_vertices == null || _vertices.Length != verticesLength)
+		int verticesLength = resolution * positions.Length;
+		if (vertices == null || vertices.Length != verticesLength)
 		{
-			_vertices = new Vector3[verticesLength];
+			vertices = new Vector3[verticesLength];
 
 			var indices = GenerateIndices(positions);
 			var uvs = GenerateUVs(positions);
 
 			if (verticesLength > Mesh.vertexCount)
 			{
-				Mesh.vertices = _vertices;
+				Mesh.vertices = vertices;
 				Mesh.triangles = indices;
 				Mesh.uv = uvs;
 			}
 			else
 			{
 				Mesh.triangles = indices;
-				Mesh.vertices = _vertices;
+				Mesh.vertices = vertices;
 				Mesh.uv = uvs;
 			}
 		}
@@ -55,15 +49,18 @@ public class MeshGenerator : MonoBehaviour
 		for (int i = 0; i < positions.Length; i++)
 		{
 			var circle = CalculateCircle(i, positions);
-			foreach (var vertex in circle)
-				_vertices[currentVertIndex++] = _useWorldSpace ? transform.InverseTransformPoint(vertex) : vertex;
+			foreach (Vector3 vertex in circle)
+				vertices[currentVertIndex++] = vertex;
+				// vertices[currentVertIndex++] = transform.InverseTransformPoint(vertex);
 		}
 
-		Mesh.vertices = _vertices;
+		Mesh.SetVertices(vertices);
 		Mesh.RecalculateNormals();
 		Mesh.RecalculateBounds();
 
 		MeshFilter.mesh = Mesh;
+
+		AddMeshCollider(Mesh);
 	}
 
 	private Vector2[] GenerateUVs(Vector3[] positions)
@@ -100,12 +97,12 @@ public class MeshGenerator : MonoBehaviour
 
 				// Triangle one
 				indices[currentIndicesIndex++] = prevVertIndex;
-				indices[currentIndicesIndex++] = (side == resolution - 1) ? (vertIndex - (resolution - 1)) : (vertIndex + 1);
+				indices[currentIndicesIndex++] = side == resolution - 1 ? vertIndex - (resolution - 1) : vertIndex + 1;
 				indices[currentIndicesIndex++] = vertIndex;
 
 				// Triangle two
-				indices[currentIndicesIndex++] = (side == resolution - 1) ? (prevVertIndex - (resolution - 1)) : (prevVertIndex + 1);
-				indices[currentIndicesIndex++] = (side == resolution - 1) ? (vertIndex - (resolution - 1)) : (vertIndex + 1);
+				indices[currentIndicesIndex++] = side == resolution - 1 ? prevVertIndex - (resolution - 1) : prevVertIndex + 1;
+				indices[currentIndicesIndex++] = side == resolution - 1 ? vertIndex - (resolution - 1) : vertIndex + 1;
 				indices[currentIndicesIndex++] = prevVertIndex;
 			}
 		}
@@ -156,10 +153,10 @@ public class MeshGenerator : MonoBehaviour
 		return circle;
 	}
 
-	private void AddMeshCollider(Mesh mesh, GameObject go)
+	private void AddMeshCollider(Mesh mesh)
 	{
-		if (!go.TryGetComponent(out MeshCollider meshCollider))
-			meshCollider = go.gameObject.AddComponent<MeshCollider>();
+		if (!gameObject.TryGetComponent(out MeshCollider meshCollider))
+			meshCollider = gameObject.AddComponent<MeshCollider>();
 
 		meshCollider.sharedMesh = mesh;
 		meshCollider.convex = true;

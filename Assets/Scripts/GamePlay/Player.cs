@@ -7,7 +7,6 @@ public class Player : Singleton<Player>
 	public Car Car { get; private set; }
 	public MeshGenerator MeshGenerator { get; private set; }
 	
-
 	private void Awake()
 	{
 		Rb = GetComponent<Rigidbody>();
