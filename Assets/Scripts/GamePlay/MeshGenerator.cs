@@ -20,10 +20,10 @@ public class MeshGenerator : MonoBehaviour
 
 	public void GenerateMesh(Vector3[] positions)
 	{
-		if (Mesh == null || positions == null || positions.Length <= 1) return;
+		if (Mesh is null || positions is null || positions.Length <= 1) return;
 
 		int verticesLength = resolution * positions.Length;
-		if (vertices == null || vertices.Length != verticesLength)
+		if (vertices is null || !vertices.Length.Equals(verticesLength))
 		{
 			vertices = new Vector3[verticesLength];
 
@@ -51,7 +51,6 @@ public class MeshGenerator : MonoBehaviour
 			var circle = CalculateCircle(i, positions);
 			foreach (Vector3 vertex in circle)
 				vertices[currentVertIndex++] = vertex;
-				// vertices[currentVertIndex++] = transform.InverseTransformPoint(vertex);
 		}
 
 		Mesh.SetVertices(vertices);
@@ -97,12 +96,12 @@ public class MeshGenerator : MonoBehaviour
 
 				// Triangle one
 				indices[currentIndicesIndex++] = prevVertIndex;
-				indices[currentIndicesIndex++] = side == resolution - 1 ? vertIndex - (resolution - 1) : vertIndex + 1;
+				indices[currentIndicesIndex++] = side.Equals(resolution - 1) ? vertIndex - (resolution - 1) : vertIndex + 1;
 				indices[currentIndicesIndex++] = vertIndex;
 
 				// Triangle two
-				indices[currentIndicesIndex++] = side == resolution - 1 ? prevVertIndex - (resolution - 1) : prevVertIndex + 1;
-				indices[currentIndicesIndex++] = side == resolution - 1 ? vertIndex - (resolution - 1) : vertIndex + 1;
+				indices[currentIndicesIndex++] = side.Equals(resolution - 1) ? prevVertIndex - (resolution - 1) : prevVertIndex + 1;
+				indices[currentIndicesIndex++] = side.Equals(resolution - 1) ? vertIndex - (resolution - 1) : vertIndex + 1;
 				indices[currentIndicesIndex++] = prevVertIndex;
 			}
 		}
@@ -138,15 +137,9 @@ public class MeshGenerator : MonoBehaviour
 		float angle = 0f;
 		float angleStep = (2 * Mathf.PI) / resolution;
 
-		float t = index / (positions.Length - 1f);
-
 		for (int i = 0; i < resolution; i++)
 		{
-			float x = Mathf.Cos(angle);
-			float y = Mathf.Sin(angle);
-
-			circle[i] = positions[index] + side * x * radius + up * y * radius;
-
+			circle[i] = positions[index] + side * Mathf.Cos(angle) * radius + up * Mathf.Sin(angle) * radius;
 			angle += angleStep;
 		}
 
@@ -158,6 +151,7 @@ public class MeshGenerator : MonoBehaviour
 		if (!gameObject.TryGetComponent(out MeshCollider meshCollider))
 			meshCollider = gameObject.AddComponent<MeshCollider>();
 
+		meshCollider.sharedMesh = null;
 		meshCollider.sharedMesh = mesh;
 		meshCollider.convex = true;
 	}

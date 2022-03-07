@@ -5,6 +5,9 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 {
 	[SerializeField] private LineRenderer brush;
 
+	[Space]
+	[SerializeField] private float timeScaleWhenDrawing = .25f;
+
 	private float distanceFromCam;
 	private float previousTimeScale;
 
@@ -19,7 +22,7 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
 	private void Start()
 	{
-		distanceFromCam = Vector3.Distance(GameManager.MainCamera.transform.position, transform.position) - 2f;
+		distanceFromCam = Vector3.Distance(GameManager.MainCamera.transform.position, transform.position) - 1;
 	}
 
 	public void OnBeginDrag(PointerEventData eventData)
@@ -28,7 +31,7 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 		brush.enabled = true;
 
 		previousTimeScale = Time.timeScale;
-		Time.timeScale *= .5f;
+		Time.timeScale = timeScaleWhenDrawing;
 	}
 
 	public void OnDrag(PointerEventData eventData)
@@ -69,16 +72,22 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
 	private void CreateMesh()
 	{
-		// car.transform.eulerAngles = Vector3.zero;
+		if (brush.positionCount < 3) return;
 
 		Vector3[] positions = new Vector3[brush.positionCount];
 		brush.GetPositions(positions);
+		Vector2 offset = positions[0];
 		for (int i = 0; i < positions.Length; i++)
+		{
+			positions[i] = Quaternion.Euler(-transform.eulerAngles) * positions[i]; // Rotate the vectors to make them 0 degree
+			// To make vectors start from 0 point
+			positions[i] -= (Vector3)offset;
 			positions[i].z = 0;
+			// Debug.Log(positions[i]);
+		}
 
 		Player.Instance.MeshGenerator.GenerateMesh(positions);
 
-		// car.transform.eulerAngles = -transform.eulerAngles;
 		car.SetupCar(positions[0], positions[positions.Length - 1]);
 	}
 }
