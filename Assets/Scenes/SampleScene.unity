@@ -978,6 +978,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Booster_1
       objectReference: {fileID: 0}
+    - target: {fileID: 2509669747057631239, guid: 0a1bcffe0b2be674991363daee0d2e45, type: 3}
+      propertyPath: boostForce
+      value: 50000
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0a1bcffe0b2be674991363daee0d2e45, type: 3}
 --- !u!1 &705507993
