@@ -17,9 +17,16 @@ public class CheckpointManager : Singleton<CheckpointManager>
 		Checkpoints = new Checkpoint[transform.childCount];
 		for (int i = 0; i < transform.childCount; i++)
 		{
-			var checkpoint =transform.GetChild(i).GetComponent<Checkpoint>();
+			var checkpoint = transform.GetChild(i).GetComponent<Checkpoint>();
 			checkpoint.Index = (uint)i;
 			Checkpoints[i] = checkpoint;
 		}
+	}
+
+	public void StartFromCheckpoint()
+	{
+		Player.Instance.transform.position = CurrentCheckpoint ? CurrentCheckpoint.transform.position : Vector3.zero;
+		Player.Instance.transform.eulerAngles = Vector3.zero;
+		Player.Instance.Rb.velocity = Vector3.zero;
 	}
 }

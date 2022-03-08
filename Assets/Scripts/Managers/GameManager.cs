@@ -23,12 +23,17 @@ public class GameManager : Singleton<GameManager>
 	}
 
 	public void LevelSuccess()
-	{
+	{	
+		// Level progression logic here
+		//
+		
+		UIManager.Instance.LevelSuccessScreen.gameObject.SetActive(true);
 		OnLevelSuccess?.Invoke();
 	}
 
 	public void LevelFail()
 	{
+		UIManager.Instance.LevelFailScreen.gameObject.SetActive(true);
 		OnLevelFail?.Invoke();
 	}
 }

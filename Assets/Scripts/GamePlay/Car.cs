@@ -28,19 +28,19 @@ public class Car : MonoBehaviour
 	{
 		Player.Instance.transform.eulerAngles = Vector3.zero;
 		transform.eulerAngles = Vector3.zero;
-		
+
 		wheels[0].transform.localPosition = firstWheelPos;
 		wheels[1].transform.localPosition = lastWheelPos;
-		wheels[0].gameObject.SetActive(true);
-		wheels[1].gameObject.SetActive(true);
-		wheels[0].ResetSprungMasses();
-		wheels[1].ResetSprungMasses();
+		for (int i = 0; i < wheels.Length; i++)
+		{
+			wheels[i].gameObject.SetActive(true);
+			wheels[i].ResetSprungMasses();
+		}
 
 		// if wheel position is under the road, set the player position above it
 		float y = lastWheelPos.y < 0 ? Mathf.Abs(lastWheelPos.y) : 0;
-
 		Player.Instance.transform.position = new Vector3(Player.Instance.transform.position.x, y, Player.Instance.transform.position.z);
-		
+
 		Player.Instance.Rb.isKinematic = false;
 		IsCarDrawn = true;
 	}
@@ -67,5 +67,11 @@ public class Car : MonoBehaviour
 	{
 		for (int i = 0; i < wheels.Length; i++)
 			wheels[i].WheelCollider.motorTorque = _speed;
+	}
+
+	public void Brake()
+	{
+		for (int i = 0; i < wheels.Length; i++)
+			wheels[i].WheelCollider.brakeTorque = speed * 2;
 	}
 }

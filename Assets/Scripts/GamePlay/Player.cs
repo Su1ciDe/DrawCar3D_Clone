@@ -32,16 +32,23 @@ public class Player : Singleton<Player>
 
 	private void OnLevelStarted()
 	{
+		drawArea.gameObject.SetActive(true);
 		drawArea.CanDraw = true;
 	}
 
 	private void OnLevelSuccess()
 	{
 		drawArea.CanDraw = false;
+		drawArea.gameObject.SetActive(false);
+
+		Car.Brake();
 	}
 
 	private void OnLevelFailed()
 	{
 		drawArea.CanDraw = false;
+		drawArea.gameObject.SetActive(false);
+		
+		Car.Brake();
 	}
 }
