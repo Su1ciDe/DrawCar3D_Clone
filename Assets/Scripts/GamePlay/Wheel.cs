@@ -18,4 +18,9 @@ public class Wheel : MonoBehaviour
 		WheelObject.position = pos;
 		WheelObject.rotation = rot;
 	}
+
+	public void ResetSprungMasses()
+	{
+		WheelCollider.ResetSprungMasses();
+	}
 }

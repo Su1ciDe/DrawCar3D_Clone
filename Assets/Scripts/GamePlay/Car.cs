@@ -14,32 +14,40 @@ public class Car : MonoBehaviour
 		InitWheels();
 	}
 
+	private void Update()
+	{
+		Player.Instance.transform.eulerAngles = Vector3.forward * Player.Instance.transform.eulerAngles.z;
+	}
+
 	private void FixedUpdate()
 	{
 		Drive();
-		Player.Instance.transform.eulerAngles = Vector3.forward * Player.Instance.transform.eulerAngles.z;
 	}
 
 	public void SetupCar(Vector3 firstWheelPos, Vector3 lastWheelPos)
 	{
+		Player.Instance.transform.eulerAngles = Vector3.zero;
+		transform.eulerAngles = Vector3.zero;
+		
 		wheels[0].transform.localPosition = firstWheelPos;
 		wheels[1].transform.localPosition = lastWheelPos;
 		wheels[0].gameObject.SetActive(true);
 		wheels[1].gameObject.SetActive(true);
+		wheels[0].ResetSprungMasses();
+		wheels[1].ResetSprungMasses();
 
-		// if wheel position is under the road, starts the player above it
+		// if wheel position is under the road, set the player position above it
 		float y = lastWheelPos.y < 0 ? Mathf.Abs(lastWheelPos.y) : 0;
 
 		Player.Instance.transform.position = new Vector3(Player.Instance.transform.position.x, y, Player.Instance.transform.position.z);
-		transform.eulerAngles = Vector3.zero;
-
+		
 		Player.Instance.Rb.isKinematic = false;
 		IsCarDrawn = true;
 	}
 
 	private void InitWheels()
 	{
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < wheels.Length; i++)
 		{
 			var wheel = Instantiate(wheelPrefab, transform);
 			wheel.gameObject.SetActive(false);
