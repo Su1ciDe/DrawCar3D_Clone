@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class DrawArea : Singleton<DrawArea>, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+	public bool CanDraw { get; set; }
+
 	[SerializeField] private LineRenderer brush;
 
 	[Space]
@@ -27,6 +29,8 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
 	public void OnBeginDrag(PointerEventData eventData)
 	{
+		if (!CanDraw) return;
+
 		car.IsCarDrawn = false;
 		brush.enabled = true;
 
@@ -36,6 +40,8 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
 	public void OnDrag(PointerEventData eventData)
 	{
+		if (!CanDraw) return;
+
 		Vector2 touchPos = eventData.position;
 
 		// Limit the drawing inside the drawing area
@@ -56,6 +62,8 @@ public class DrawArea : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
 
 	public void OnEndDrag(PointerEventData eventData)
 	{
+		if (!CanDraw) return;
+
 		CreateMesh();
 
 		brush.positionCount = 0;
